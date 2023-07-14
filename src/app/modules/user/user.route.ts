@@ -1,30 +1,35 @@
 import express from 'express';
-import { validateRequest } from '../../middlewares/validateRequest';
-import { UserController } from './user.controller';
-import { UserValidation } from './user.validation';
-import { auth } from '../../middlewares/auth';
 import { ENUM_USER_ROLES } from '../../../enums/user';
-const router = express.Router();
+import { auth } from '../../middlewares/auth';
+import { validateRequest } from '../../middlewares/validateRequest';
+import { userController } from './user.controller';
+import { UserValidation } from './user.validation';
+export const userRouter = express.Router();
 
-router.post(
-  '/create-student',
-  validateRequest(UserValidation.createUserZodSchema),
-  auth(ENUM_USER_ROLES.SUPER_ADMIN, ENUM_USER_ROLES.ADMIN),
-  UserController.createStudent
+// userRouter.post(
+//   '/create',
+//   validateRequest(UserValidation.createUserZodSchema),
+//   userController.createUser
+// );
+
+userRouter.get(
+  '/:id',
+  auth(ENUM_USER_ROLES.SUPERUSER, ENUM_USER_ROLES.ADMIN),
+  userController.getSingleUser
 );
-
-router.post(
-  '/create-faculty',
-  validateRequest(UserValidation.createFacultyZodSchema),
-  auth(ENUM_USER_ROLES.SUPER_ADMIN, ENUM_USER_ROLES.ADMIN),
-  UserController.createFaculty
+userRouter.delete(
+  '/:id',
+  auth(ENUM_USER_ROLES.SUPERUSER, ENUM_USER_ROLES.ADMIN),
+  userController.deleteUser
 );
-
-router.post(
-  '/create-admin',
-  validateRequest(UserValidation.createAdminZodSchema),
-  auth(ENUM_USER_ROLES.SUPER_ADMIN, ENUM_USER_ROLES.ADMIN),
-  UserController.createAdmin
+userRouter.patch(
+  '/:id',
+  validateRequest(UserValidation.updateUserZodSchema),
+  auth(ENUM_USER_ROLES.SUPERUSER, ENUM_USER_ROLES.ADMIN),
+  userController.updateUser
 );
-
-export const UserRoutes = router;
+userRouter.get(
+  '/',
+  auth(ENUM_USER_ROLES.SUPERUSER, ENUM_USER_ROLES.ADMIN),
+  userController.getAllUsers
+);

@@ -1,18 +1,14 @@
 import httpStatus, { NOT_FOUND, UNAUTHORIZED } from 'http-status';
-import { JwtPayload, Secret } from 'jsonwebtoken';
+import { Secret } from 'jsonwebtoken';
 import config from '../../../config';
 import ApiError from '../../../errors/ApiError';
 import { jwtHelpers } from '../../../helpers/jwtHelper';
 import { User } from '../user/user.model';
-import {
-  IChangePassword,
-  ILoginUser,
-  ILoginUserResponse,
-} from './auth.interface';
+import { ILoginUser, ILoginUserResponse } from './auth.interface';
 
 const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
-  const { id, password } = payload;
-  const isExistingUser = await User.isUserExist(id);
+  const { phoneNumber, password } = payload;
+  const isExistingUser = await User.isUserExist(phoneNumber);
 
   if (!isExistingUser) {
     throw new ApiError(NOT_FOUND, 'User not found');
@@ -28,15 +24,15 @@ const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
 
   //create access token & refresh token
 
-  const { id: userId, role, needsPasswordChange } = isExistingUser;
+  const { _id, role } = isExistingUser;
   const accessToken = jwtHelpers.createToken(
-    { userId, role },
+    { _id, role, phoneNumber: isExistingUser.phoneNumber },
     config.jwt.secret as Secret,
     config.jwt.expires_in as string
   );
 
   const refreshToken = jwtHelpers.createToken(
-    { userId, role },
+    { _id, role, phoneNumber: isExistingUser.phoneNumber },
     config.jwt.refresh_secret as Secret,
     config.jwt.refresh_expires_in as string
   );
@@ -44,7 +40,6 @@ const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
   return {
     accessToken,
     refreshToken,
-    needsPasswordChange,
   };
 };
 
@@ -59,19 +54,20 @@ const refreshToken = async (token: string) => {
     throw new ApiError(httpStatus.FORBIDDEN, 'Invalid Refresh Token');
   }
 
-  const { userId } = verifiedToken;
+  const { phoneNumber } = verifiedToken;
 
   // checking deleted user's refresh token
 
-  const isUserExist = await User.isUserExist(userId);
+  const isUserExist = await User.isUserExist(phoneNumber);
   if (!isUserExist) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist');
   }
   //generate new token
   const newAccessToken = jwtHelpers.createToken(
     {
-      id: isUserExist.id,
+      _id: isUserExist._id,
       role: isUserExist.role,
+      phoneNumber: isUserExist.phoneNumber,
     },
     config.jwt.secret as Secret,
     config.jwt.expires_in as string
@@ -82,52 +78,4 @@ const refreshToken = async (token: string) => {
   };
 };
 
-const changePassword = async (
-  user: JwtPayload | null,
-  payload: IChangePassword
-): Promise<void> => {
-  const { oldPassword, newPassword } = payload;
-
-  // // checking is user exist
-  // const isUserExist = await User.isUserExist(user?.userId);
-
-  //alternative way
-  const isUserExist = await User.findOne({ id: user?.userId }).select(
-    '+password'
-  );
-
-  if (!isUserExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist');
-  }
-
-  // checking old password
-  if (
-    isUserExist.password &&
-    !(await User.isPasswordMatched(oldPassword, isUserExist.password))
-  ) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Old Password is incorrect');
-  }
-
-  // // hash password before saving
-  // const newHashedPassword = await bcrypt.hash(
-  //   newPassword,
-  //   Number(config.bycrypt_salt_rounds)
-  // );
-
-  // const query = { id: user?.userId };
-  // const updatedData = {
-  //   password: newHashedPassword,  //
-  //   needsPasswordChange: false,
-  //   passwordChangedAt: new Date(), //
-  // };
-
-  // await User.findOneAndUpdate(query, updatedData);
-  // data update
-  isUserExist.password = newPassword;
-  isUserExist.needsPasswordChange = false;
-
-  // updating using save()
-  isUserExist.save();
-};
-
-export const authService = { loginUser, refreshToken, changePassword };
+export const authService = { loginUser, refreshToken };

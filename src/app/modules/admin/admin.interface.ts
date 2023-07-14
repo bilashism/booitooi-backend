@@ -1,39 +1,48 @@
+/* eslint-disable no-unused-vars */
 import { Model, Types } from 'mongoose';
-import { IManagementDepartment } from '../managementDepartment/managementDepartment.interface';
+import { IUserRole } from '../user/user.interface';
 
 export type UserName = {
   firstName: string;
   lastName: string;
-  middleName: string;
 };
 
 export type IAdmin = {
-  id: string;
   name: UserName;
-  profileImage: string;
-  dateOfBirth?: string;
-  email: string;
-  contactNo: string;
-  emergencyContactNo: string;
-  gender?: 'male' | 'female';
-  permanentAddress?: string;
-  presentAddress?: string;
-  bloodGroup?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
-
-  managementDepartment: Types.ObjectId | IManagementDepartment;
-  designation: string;
+  phoneNumber: string;
+  address?: string;
+  role: string;
+  password: string;
 };
+export type IExistingUser = {
+  _id: Types.ObjectId;
+  role: IUserRole;
+  password: string;
+  phoneNumber: string;
+};
+export type AdminModel = {
+  isUserExist(phoneNumber: string): Promise<IExistingUser | null>;
+  isPasswordMatched(
+    givenPassword: string,
+    savedPassword: string
+  ): Promise<boolean>;
+} & Model<IAdmin>;
 
-export type AdminModel = Model<IAdmin, Record<string, unknown>>;
+// export type AdminModel = Model<IAdmin, Record<string, unknown>>;
 
 export type IAdminFilters = {
   searchTerm?: string;
-  id?: string;
-  email?: string;
-  contactNo?: string;
-  emergencyContactNo?: string;
-  gender?: 'male' | 'female';
-  bloodGroup?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
-  managementDepartment?: string;
-  designation?: string;
+  phoneNumber?: string;
+  name?: string;
 };
+// export type ILoginUser = {
+//   phoneNumber: string;
+//   password: string;
+// };
+// export type ILoginUserResponse = {
+//   accessToken: string;
+//   refreshToken?: string;
+// };
+// export type IRefreshTokenResponse = {
+//   accessToken: string;
+// };

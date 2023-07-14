@@ -1,246 +1,64 @@
 import { z } from 'zod';
-import { bloodGroup, gender } from '../student/student.constant';
+import { userRole } from './user.constant';
+import { User } from './user.model';
 
 const createUserZodSchema = z.object({
-  body: z.object({
-    password: z.string().optional(),
-
-    student: z.object({
+  body: z
+    .object({
       name: z.object({
         firstName: z.string({
-          required_error: 'First name is required',
+          required_error: 'first name is required',
         }),
         lastName: z.string({
-          required_error: 'Last name is required',
-        }),
-        middleName: z.string().optional(),
-      }),
-      gender: z.enum([...gender] as [string, ...string[]], {
-        required_error: 'Gender is required',
-      }),
-      dateOfBirth: z.string({
-        required_error: 'Date of birth is required',
-      }),
-      email: z
-        .string({
-          required_error: 'Email is required',
-        })
-        .email(),
-      contactNo: z.string({
-        required_error: 'Contact number is required',
-      }),
-      emergencyContactNo: z.string({
-        required_error: 'Emergency contact number is required',
-      }),
-      bloodGroup: z.enum([...bloodGroup] as [string, ...string[]]).optional(),
-      presentAddress: z.string({
-        required_error: 'Present address is required',
-      }),
-      permanentAddress: z.string({
-        required_error: 'Permanent address is required',
-      }),
-      academicSemester: z.string({
-        required_error: 'Academic semester is required',
-      }),
-      academicDepartment: z.string({
-        required_error: 'Academic department is required',
-      }),
-      academicFaculty: z.string({
-        required_error: 'Academic faculty is required',
-      }),
-      guardian: z.object({
-        fatherName: z.string({
-          required_error: 'Father name is required',
-        }),
-        fatherOccupation: z.string({
-          required_error: 'Father occupation is required',
-        }),
-        fatherContactNo: z.string({
-          required_error: 'Father contact number is required',
-        }),
-        motherName: z.string({
-          required_error: 'Mother name is required',
-        }),
-        motherOccupation: z.string({
-          required_error: 'Mother occupation is required',
-        }),
-        motherContactNo: z.string({
-          required_error: 'Mother contact number is required',
-        }),
-        address: z.string({
-          required_error: 'Guardian address is required',
+          required_error: 'last name is required',
         }),
       }),
-      localGuardian: z.object({
-        name: z.string({
-          required_error: 'Local guardian name is required',
-        }),
-        occupation: z.string({
-          required_error: 'Local guardian occupation is required',
-        }),
-        contactNo: z.string({
-          required_error: 'Local guardian contact number is required',
-        }),
-        address: z.string({
-          required_error: 'Local guardian address is required',
-        }),
-      }),
-      profileImage: z.string().optional(),
-    }),
-    // .refine(
-    //   async student => {
-    //     // Check if email is unique
-    //     const isExisting = await Student.findOne({
-    //       email: student?.email,
-    //     }).lean();
-    //     return isExisting ? false : true;
-    //   },
-    //   { message: 'Email already exists' }
-    // ),
-  }),
+      role: z.enum(
+        [...userRole.filter(role => role !== 'admin')] as [string, ...string[]],
+        {
+          required_error: 'role is required',
+        }
+      ),
+      address: z.string({ required_error: 'address is required' }),
+      phoneNumber: z.string({ required_error: 'phoneNumber is required' }),
+      password: z.string().optional(),
+      budget: z.number().optional(),
+      income: z.number().optional(),
+    })
+    .refine(
+      async user => {
+        // Check if phoneNumber is unique
+        const isExisting = await User.findOne({
+          phoneNumber: user?.phoneNumber,
+        }).lean();
+        return isExisting ? false : true;
+      },
+      { message: 'Phone number already exists' }
+    ),
 });
-
-const createFacultyZodSchema = z.object({
+const updateUserZodSchema = z.object({
   body: z.object({
+    name: z
+      .object({
+        firstName: z.string().optional(),
+        lastName: z.string().optional(),
+      })
+      .optional(),
+    role: z
+      .enum([...userRole.filter(role => role !== 'admin')] as [
+        string,
+        ...string[]
+      ])
+      .optional(),
+    address: z.string().optional(),
+    phoneNumber: z.string().optional(),
     password: z.string().optional(),
-
-    faculty: z.object({
-      name: z.object({
-        firstName: z.string({
-          required_error: 'First name is required',
-        }),
-        lastName: z.string({
-          required_error: 'Last name is required',
-        }),
-        middleName: z.string().optional(),
-      }),
-      gender: z.string({
-        required_error: 'Gender is required',
-      }),
-      dateOfBirth: z.string({
-        required_error: 'Date of birth is required',
-      }),
-      email: z
-        .string({
-          required_error: 'Email is required',
-        })
-        .email(),
-      contactNo: z.string({
-        required_error: 'Contact number is required',
-      }),
-      emergencyContactNo: z.string({
-        required_error: 'Emergency contact number is required',
-      }),
-      bloodGroup: z
-        .string({
-          required_error: 'Blood group is required',
-        })
-        .optional(),
-      presentAddress: z.string({
-        required_error: 'Present address is required',
-      }),
-      permanentAddress: z.string({
-        required_error: 'Permanent address is required',
-      }),
-      academicDepartment: z.string({
-        required_error: 'Academic department is required',
-      }),
-
-      academicFaculty: z.string({
-        required_error: 'Academic faculty is required',
-      }),
-      designation: z.string({
-        required_error: 'Designation is required',
-      }),
-      profileImage: z.string().optional(),
-    }),
-    // .refine(
-    //   async value => {
-    //     // Check if email is unique
-    //     const isExisting = await Faculty.findOne({
-    //       email: value?.email,
-    //     }).lean();
-    //     return isExisting ? false : true;
-    //   },
-    //   { message: 'Email already exists' }
-    // ),
-  }),
-});
-
-const createAdminZodSchema = z.object({
-  body: z.object({
-    password: z.string().optional(),
-
-    admin: z.object({
-      name: z.object({
-        firstName: z.string({
-          required_error: 'First name is required',
-        }),
-        lastName: z.string({
-          required_error: 'Last name is required',
-        }),
-        middleName: z.string().optional(),
-      }),
-
-      dateOfBirth: z.string({
-        required_error: 'Date of birth is required',
-      }),
-
-      gender: z.string({
-        required_error: 'Gender is required',
-      }),
-
-      bloodGroup: z.string({
-        required_error: 'Blood group is required',
-      }),
-
-      email: z
-        .string({
-          required_error: 'Email is required',
-        })
-        .email(),
-
-      contactNo: z.string({
-        required_error: 'Contact number is required',
-      }),
-
-      emergencyContactNo: z.string({
-        required_error: 'Emergency contact number is required',
-      }),
-
-      presentAddress: z.string({
-        required_error: 'Present address is required',
-      }),
-
-      permanentAddress: z.string({
-        required_error: 'Permanent address is required',
-      }),
-
-      managementDepartment: z.string({
-        required_error: 'Management department is required',
-      }),
-
-      designation: z.string({
-        required_error: 'Designation is required',
-      }),
-
-      profileImage: z.string().optional(),
-    }),
-    // .refine(
-    //   async value => {
-    //     // Check if email is unique
-    //     const isExisting = await Admin.findOne({
-    //       email: value?.email,
-    //     }).lean();
-    //     return isExisting ? false : true;
-    //   },
-    //   { message: 'Email already exists' }
-    // ),
+    budget: z.number().optional(),
+    income: z.number().optional(),
   }),
 });
 
 export const UserValidation = {
   createUserZodSchema,
-  createFacultyZodSchema,
-  createAdminZodSchema,
+  updateUserZodSchema,
 };

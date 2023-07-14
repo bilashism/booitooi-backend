@@ -1,134 +1,106 @@
+import { Secret } from 'jsonwebtoken';
+import { ILoginUser, ILoginUserResponse } from './../auth/auth.interface';
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import httpStatus from 'http-status';
-import mongoose, { SortOrder } from 'mongoose';
+import httpStatus, { NOT_FOUND, UNAUTHORIZED } from 'http-status';
+import config from '../../../config';
+import { ENUM_USER_ROLES } from '../../../enums/user';
 import ApiError from '../../../errors/ApiError';
-import { paginationHelper } from '../../../helpers/paginationHelper';
-import { IGenericResponse } from '../../../interfaces/common';
-import { IPaginationOptions } from '../../../interfaces/pagination';
-import { User } from '../user/user.model';
-import { adminSearchableFields } from './admin.constant';
-import { IAdmin, IAdminFilters } from './admin.interface';
+import { jwtHelpers } from '../../../helpers/jwtHelper';
+import { IAdmin } from './admin.interface';
 import { Admin } from './admin.model';
 
-const getAllAdmins = async (
-  filters: IAdminFilters,
-  paginationOptions: IPaginationOptions
-): Promise<IGenericResponse<IAdmin[]>> => {
-  const { searchTerm, ...filtersData } = filters;
-  const { page, limit, skip, sortBy, sortOrder } =
-    paginationHelper.calculatePagination(paginationOptions);
+const createAdmin = async (admin: IAdmin): Promise<IAdmin | null> => {
+  // default password
+  if (!admin.password) {
+    admin.password = config.DEFAULT_ADMIN_PASS as string;
+  }
+  // set role
+  admin.role = ENUM_USER_ROLES.ADMIN;
 
-  const andConditions = [];
+  const newAdmin = await Admin.create(admin);
 
-  if (searchTerm) {
-    andConditions.push({
-      $or: adminSearchableFields.map(field => ({
-        [field]: {
-          $regex: searchTerm,
-          $options: 'i',
-        },
-      })),
-    });
+  if (!newAdmin) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Failed to create admin.');
   }
 
-  if (Object.keys(filtersData).length) {
-    andConditions.push({
-      $and: Object.entries(filtersData).map(([field, value]) => ({
-        [field]: value,
-      })),
-    });
+  const result = await Admin.findById(newAdmin._id);
+  return result;
+};
+
+const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
+  const { phoneNumber, password } = payload;
+  const isExistingUser = await Admin.isUserExist(phoneNumber);
+
+  if (!isExistingUser || isExistingUser.role !== 'admin') {
+    throw new ApiError(NOT_FOUND, 'Admin not found');
+  }
+  // match password
+  const isPasswordMatched = await Admin.isPasswordMatched(
+    password,
+    isExistingUser.password
+  );
+
+  if (isExistingUser.password && !isPasswordMatched) {
+    throw new ApiError(UNAUTHORIZED, 'password not matched');
   }
 
-  const sortConditions: { [key: string]: SortOrder } = {};
+  //create access token & refresh token
 
-  if (sortBy && sortOrder) {
-    sortConditions[sortBy] = sortOrder;
-  }
-  const whereConditions =
-    andConditions.length > 0 ? { $and: andConditions } : {};
+  const { _id, role } = isExistingUser;
+  const accessToken = jwtHelpers.createToken(
+    { _id, role, phoneNumber: isExistingUser.phoneNumber },
+    config.jwt.secret as Secret,
+    config.jwt.expires_in as string
+  );
 
-  const result = await Admin.find(whereConditions)
-    .populate('managementDepartment')
-    .sort(sortConditions)
-    .skip(skip)
-    .limit(limit);
-
-  const total = await Admin.countDocuments(whereConditions);
+  const refreshToken = jwtHelpers.createToken(
+    { _id, role, phoneNumber: isExistingUser.phoneNumber },
+    config.jwt.refresh_secret as Secret,
+    config.jwt.refresh_expires_in as string
+  );
 
   return {
-    meta: {
-      page,
-      limit,
-      total,
-    },
-    data: result,
+    accessToken,
+    refreshToken,
   };
 };
 
-const getSingleAdmin = async (id: string): Promise<IAdmin | null> => {
-  const result = await Admin.findOne({ id }).populate('ManagementDepartment');
-  return result;
-};
-
-const updateAdmin = async (
-  id: string,
-  payload: Partial<IAdmin>
-): Promise<IAdmin | null> => {
-  const isExist = await Admin.findOne({ id });
-
-  if (!isExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Admin not found !');
-  }
-
-  const { name, ...adminData } = payload;
-
-  const updatedStudentData: Partial<IAdmin> = { ...adminData };
-
-  if (name && Object.keys(name).length > 0) {
-    Object.keys(name).forEach(key => {
-      const nameKey = `name.${key}` as keyof Partial<IAdmin>;
-      (updatedStudentData as any)[nameKey] = name[key as keyof typeof name];
-    });
-  }
-
-  const result = await Admin.findOneAndUpdate({ id }, updatedStudentData, {
-    new: true,
-  });
-  return result;
-};
-
-const deleteAdmin = async (id: string): Promise<IAdmin | null> => {
-  // check if the faculty is exist
-  const isExist = await Admin.findOne({ id });
-
-  if (!isExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Faculty not found !');
-  }
-
-  const session = await mongoose.startSession();
-
+const refreshToken = async (token: string) => {
+  let verifiedToken = null;
   try {
-    session.startTransaction();
-    //delete student first
-    const student = await Admin.findOneAndDelete({ id }, { session });
-    if (!student) {
-      throw new ApiError(404, 'Failed to delete student');
-    }
-    //delete user
-    await User.deleteOne({ id });
-    session.commitTransaction();
-    session.endSession();
-
-    return student;
-  } catch (error) {
-    session.abortTransaction();
-    throw error;
+    verifiedToken = jwtHelpers.verifyToken(
+      token,
+      config.jwt.refresh_secret as Secret
+    );
+  } catch (err) {
+    throw new ApiError(httpStatus.FORBIDDEN, 'Invalid Refresh Token');
   }
+  const { phoneNumber } = verifiedToken;
+
+  // checking deleted user's refresh token
+
+  const isUserExist = await Admin.isUserExist(phoneNumber);
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Admin does not exist');
+  }
+  //generate new token
+  const newAccessToken = jwtHelpers.createToken(
+    {
+      _id: isUserExist._id,
+      role: isUserExist.role,
+      phoneNumber: isUserExist.phoneNumber,
+    },
+    config.jwt.secret as Secret,
+    config.jwt.expires_in as string
+  );
+
+  return {
+    accessToken: newAccessToken,
+  };
 };
 
 export const AdminService = {
-  getAllAdmins,
-  getSingleAdmin,
-  updateAdmin,
-  deleteAdmin,
+  createAdmin,
+  loginUser,
+  refreshToken,
 };

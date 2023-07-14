@@ -5,33 +5,48 @@ const updateAdmin = z.object({
     name: z.object({
       firstName: z.string().optional(),
       lastName: z.string().optional(),
-      middleName: z.string().optional(),
+    }),
+    phoneNumber: z.string().optional(),
+    address: z.string().optional(),
+  }),
+});
+const createAdminZodSchema = z.object({
+  body: z.object({
+    password: z.string().optional(),
+    role: z.string({
+      required_error: 'role must be provided',
+    }),
+    name: z.object({
+      firstName: z.string({
+        required_error: 'First name is required',
+      }),
+      lastName: z.string({
+        required_error: 'Last name is required',
+      }),
     }),
 
-    dateOfBirth: z.string().optional(),
+    phoneNumber: z.string({
+      required_error: 'Contact number is required',
+    }),
 
-    gender: z.string().optional(),
+    address: z.string({
+      required_error: 'Present address is required',
+    }),
 
-    bloodGroup: z.string().optional(),
-
-    email: z.string().email().optional(),
-
-    contactNo: z.string().optional(),
-
-    emergencyContactNo: z.string().optional(),
-
-    presentAddress: z.string().optional(),
-
-    permanentAddress: z.string().optional(),
-
-    department: z.string().optional(),
-
-    designation: z.string().optional(),
-
-    profileImage: z.string().optional(),
+    // .refine(
+    //   async value => {
+    //     // Check if email is unique
+    //     const isExisting = await Admin.findOne({
+    //       email: value?.email,
+    //     }).lean();
+    //     return isExisting ? false : true;
+    //   },
+    //   { message: 'Email already exists' }
+    // ),
   }),
 });
 
 export const AdminValidation = {
   updateAdmin,
+  createAdminZodSchema,
 };

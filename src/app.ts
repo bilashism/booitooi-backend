@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 import httpStatus from 'http-status';
@@ -7,7 +8,7 @@ import {
 } from './app/middlewares/globalErrorHandler';
 import { appRouter } from './app/routes';
 import config from './config';
-import cookieParser from 'cookie-parser';
+
 const app: Application = express();
 
 // standard middleware

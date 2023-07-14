@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 export enum ENUM_USER_ROLES {
-  SUPER_ADMIN = 'super_admin',
+  SUPERUSER = 'superuser',
   ADMIN = 'admin',
-  STUDENT = 'student',
-  FACULTY = 'faculty',
+  BUYER = 'buyer',
+  SELLER = 'seller',
 }

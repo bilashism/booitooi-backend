@@ -1,42 +1,42 @@
-import { Schema, model } from 'mongoose';
-import { IUser, UserModel } from './user.interface';
-import config from '../../../config';
 import bcrypt from 'bcrypt';
+import { Schema, model } from 'mongoose';
+import config from '../../../config';
+import { userRole } from './user.constant';
+import { IUser, IUserName, UserModel } from './user.interface';
 
-const userSchema = new Schema<IUser, UserModel>(
+const userNameSchema = new Schema<IUserName>({
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+});
+
+// User Schema
+const userSchema = new Schema<IUser>(
   {
-    id: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+    id: { type: String, required: true, unique: true },
+    name: userNameSchema,
     role: {
       type: String,
+      required: true,
+      enum: userRole.filter(role => role !== 'admin'),
+    },
+    address: {
+      type: String,
+      required: true,
+    },
+    budget: {
+      type: Number,
+    },
+    income: {
+      type: Number,
+    },
+    phoneNumber: {
+      type: String,
+      unique: true,
       required: true,
     },
     password: {
       type: String,
-      required: true,
       select: 0,
-    },
-    needsPasswordChange: {
-      type: Boolean,
-      default: true,
-    },
-    passwordChangedAt: {
-      type: Date,
-    },
-    student: {
-      type: Schema.Types.ObjectId,
-      ref: 'Student',
-    },
-    faculty: {
-      type: Schema.Types.ObjectId,
-      ref: 'Faculty',
-    },
-    admin: {
-      type: Schema.Types.ObjectId,
-      ref: 'Admin',
     },
   },
   {
@@ -46,29 +46,13 @@ const userSchema = new Schema<IUser, UserModel>(
     },
   }
 );
-// userSchema.methods.isExistingUser = async function (
-//   id: string
-// ): Promise<Partial<IUser> | null> {
-//   const user = await User.findOne(
-//     { id },
-//     {
-//       id: 1,
-//       password: 1,
-//       needsPasswordChange: 1,
-//     }
-//   );
-//   return user;
-// };
 
 userSchema.statics.isUserExist = async function (
-  id: string
-): Promise<Pick<
-  IUser,
-  'id' | 'password' | 'role' | 'needsPasswordChange'
-> | null> {
+  phoneNumber: string
+): Promise<Partial<IUser> | null> {
   return await User.findOne(
-    { id },
-    { id: 1, password: 1, role: 1, needsPasswordChange: 1 }
+    { phoneNumber },
+    { password: 1, role: 1, phoneNumber: 1 }
   );
 };
 
@@ -85,10 +69,6 @@ userSchema.pre('save', async function (next) {
     this.password,
     Number(config.BCRYPT_SALT_ROUNDS)
   );
-
-  if (!this.needsPasswordChange) {
-    this.passwordChangedAt = new Date();
-  }
   next();
 });
 

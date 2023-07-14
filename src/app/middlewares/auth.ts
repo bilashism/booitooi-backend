@@ -15,9 +15,10 @@ export const auth =
         throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized');
       }
       // verify token
-      let verifiedUser = null;
-
-      verifiedUser = jwtHelpers.verifyToken(token, config.jwt.secret as Secret);
+      const verifiedUser = jwtHelpers.verifyToken(
+        token,
+        config.jwt.secret as Secret
+      );
 
       req.user = verifiedUser; // role , userId
 

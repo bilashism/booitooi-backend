@@ -1,13 +1,11 @@
+import bcrypt from 'bcrypt';
 import { Schema, model } from 'mongoose';
+import config from '../../../config';
+import { ENUM_USER_ROLES } from '../../../enums/user';
 import { AdminModel, IAdmin } from './admin.interface';
 
 const AdminSchema = new Schema<IAdmin, AdminModel>(
   {
-    id: {
-      type: String,
-      required: true,
-      unique: true,
-    },
     name: {
       type: {
         firstName: {
@@ -18,57 +16,27 @@ const AdminSchema = new Schema<IAdmin, AdminModel>(
           type: String,
           required: true,
         },
-        middleName: {
-          type: String,
-          required: false,
-        },
       },
       required: true,
     },
-    dateOfBirth: {
+    role: {
       type: String,
+      required: true,
+      enum: [ENUM_USER_ROLES.ADMIN],
     },
-    gender: {
-      type: String,
-      enum: ['male', 'female'],
-    },
-    bloodGroup: {
-      type: String,
-      enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
-    },
-    email: {
+    phoneNumber: {
       type: String,
       unique: true,
       required: true,
     },
-    contactNo: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    emergencyContactNo: {
+    password: {
       type: String,
       required: true,
+      select: 0,
     },
-    presentAddress: {
+    address: {
       type: String,
       required: true,
-    },
-    permanentAddress: {
-      type: String,
-      required: true,
-    },
-    managementDepartment: {
-      type: Schema.Types.ObjectId,
-      ref: 'ManagementDepartment',
-      required: true,
-    },
-    designation: {
-      type: String,
-      required: true,
-    },
-    profileImage: {
-      type: String,
     },
   },
   {
@@ -76,4 +44,28 @@ const AdminSchema = new Schema<IAdmin, AdminModel>(
   }
 );
 
+AdminSchema.statics.isUserExist = async function (
+  phoneNumber: string
+): Promise<Partial<IAdmin> | null> {
+  return await Admin.findOne(
+    { phoneNumber },
+    { password: 1, role: 1, phoneNumber: 1 }
+  );
+};
+
+AdminSchema.statics.isPasswordMatched = async function (
+  givenPassword: string,
+  savedPassword: string
+): Promise<boolean> {
+  return await bcrypt.compare(givenPassword, savedPassword);
+};
+
+AdminSchema.pre('save', async function (next) {
+  // hash password
+  this.password = await bcrypt.hash(
+    this.password,
+    Number(config.BCRYPT_SALT_ROUNDS)
+  );
+  next();
+});
 export const Admin = model<IAdmin, AdminModel>('Admin', AdminSchema);
