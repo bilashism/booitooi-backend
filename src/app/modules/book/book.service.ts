@@ -6,14 +6,14 @@ import {
   paginationHelper,
 } from '../../../helpers/paginationHelper';
 import { IGenericResponse } from '../../../interfaces/common';
-import { cowSearchableFields } from './cow.constant';
-import { ICow, ICowFilters } from './cow.interface';
-import { Cow } from './cow.model';
+import { bookSearchableFields } from './book.constant';
+import { IBook, IBookFilters } from './book.interface';
+import { Book } from './book.model';
 
-const createCow = async (cow: ICow): Promise<ICow | null> => {
-  const createdCow = await Cow.create(cow);
+const createBook = async (cow: IBook): Promise<IBook | null> => {
+  const createdCow = await Book.create(cow);
 
-  if (!createCow) {
+  if (!createBook) {
     throw new ApiError(
       httpStatus.INTERNAL_SERVER_ERROR,
       'Failed to create cow!'
@@ -22,16 +22,16 @@ const createCow = async (cow: ICow): Promise<ICow | null> => {
   return createdCow;
 };
 
-const getAllCows = async (
-  filters: ICowFilters,
+const getAllBooks = async (
+  filters: IBookFilters,
   paginationOptions: IPaginationOptions
-): Promise<IGenericResponse<ICow[]>> => {
+): Promise<IGenericResponse<IBook[]>> => {
   const { searchTerm, ...filtersData } = filters;
   const andConditions = [];
 
   if (searchTerm) {
     andConditions.push({
-      $or: cowSearchableFields.map(field => ({
+      $or: bookSearchableFields.map(field => ({
         [field]: {
           $regex: searchTerm,
           $options: 'i',
@@ -92,12 +92,12 @@ const getAllCows = async (
     path: 'seller',
     select: '-password', // Exclude the password field from the populated user document
   };
-  const result = await Cow.find(whereConditions)
+  const result = await Book.find(whereConditions)
     .populate(populateOptions)
     .sort(sortCondition)
     .skip(skip)
     .limit(limit);
-  const total = await Cow.countDocuments();
+  const total = await Book.countDocuments();
   return {
     meta: {
       page,
@@ -107,29 +107,29 @@ const getAllCows = async (
     data: result,
   };
 };
-const getSingleCow = async (id: string): Promise<ICow | null> => {
-  const result = await Cow.findById(id);
+const getSingleBook = async (id: string): Promise<IBook | null> => {
+  const result = await Book.findById(id);
   return result;
 };
 
-const updateCow = async (
+const updateBook = async (
   id: string,
-  payload: Partial<ICow>
-): Promise<ICow | null> => {
-  const result = await Cow.findOneAndUpdate({ _id: id }, payload, {
+  payload: Partial<IBook>
+): Promise<IBook | null> => {
+  const result = await Book.findOneAndUpdate({ _id: id }, payload, {
     new: true,
   });
   return result;
 };
-const deleteCow = async (id: string): Promise<ICow | null> => {
-  const result = await Cow.findByIdAndDelete(id);
+const deleteBook = async (id: string): Promise<IBook | null> => {
+  const result = await Book.findByIdAndDelete(id);
   return result;
 };
 
 export const cowService = {
-  createCow,
-  getAllCows,
-  getSingleCow,
-  updateCow,
-  deleteCow,
+  createBook,
+  getAllBooks,
+  getSingleBook,
+  updateBook,
+  deleteBook,
 };

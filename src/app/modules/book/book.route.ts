@@ -3,18 +3,18 @@ import { ENUM_USER_ROLES } from '../../../enums/user';
 import { auth } from '../../middlewares/auth';
 import { rightCowSeller } from '../../middlewares/rightCowSeller';
 import { validateRequest } from '../../middlewares/validateRequest';
-import { cowController } from './cow.controller';
-import { CowValidation } from './cow.validation';
-export const cowRouter = express.Router();
+import { bookController } from './book.controller';
+import { BookValidation } from './book.validation';
+export const bookRouter = express.Router();
 
-cowRouter.post(
+bookRouter.post(
   '/',
-  validateRequest(CowValidation.createCowZodSchema),
+  validateRequest(BookValidation.createBookZodSchema),
   auth(ENUM_USER_ROLES.SELLER),
-  cowController.createCow
+  bookController.createBook
 );
 
-cowRouter.get(
+bookRouter.get(
   '/:id',
   auth(
     ENUM_USER_ROLES.SUPERUSER,
@@ -22,10 +22,10 @@ cowRouter.get(
     ENUM_USER_ROLES.SELLER,
     ENUM_USER_ROLES.BUYER
   ),
-  cowController.getSingleCow
+  bookController.getSingleBook
 );
 
-cowRouter.get(
+bookRouter.get(
   '/',
   auth(
     ENUM_USER_ROLES.SUPERUSER,
@@ -33,20 +33,20 @@ cowRouter.get(
     ENUM_USER_ROLES.SELLER,
     ENUM_USER_ROLES.BUYER
   ),
-  cowController.getAllCows
+  bookController.getAllBooks
 );
 
-cowRouter.patch(
+bookRouter.patch(
   '/:id',
-  validateRequest(CowValidation.updateCowZodSchema),
+  validateRequest(BookValidation.updateBookZodSchema),
   auth(ENUM_USER_ROLES.SELLER),
   rightCowSeller,
-  cowController.updateCow
+  bookController.updateBook
 );
 
-cowRouter.delete(
+bookRouter.delete(
   '/:id',
   auth(ENUM_USER_ROLES.SELLER),
   rightCowSeller,
-  cowController.deleteCow
+  bookController.deleteBook
 );

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import ApiError from '../../errors/ApiError';
-import { Cow } from '../modules/cow/cow.model';
+import { Book } from '../modules/book/book.model';
 import { User } from '../modules/user/user.model';
 import { ENUM_USER_ROLES } from '../../enums/user';
 import { Order } from '../modules/order/order.model';
@@ -27,7 +27,7 @@ export const orderSpecificUser = async (
       const orderedCow = await Order.findOne({ buyer: isRightUser._id });
       console.log(orderedCow);
     } else if (isRightUser.role === ENUM_USER_ROLES.SELLER) {
-      const soldCows = await Cow.find({
+      const soldCows = await Book.find({
         seller: isRightUser._id,
         label: 'sold out',
       });

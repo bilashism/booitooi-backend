@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import ApiError from '../../errors/ApiError';
-import { Cow } from '../modules/cow/cow.model';
+import { Book } from '../modules/book/book.model';
 
 export const rightCowSeller = async (
   req: Request,
@@ -10,7 +10,7 @@ export const rightCowSeller = async (
 ) => {
   try {
     // verify cow seller
-    const isRightSeller = await Cow.findOne({
+    const isRightSeller = await Book.findOne({
       _id: req.params.id,
       seller: req.user._id,
     }).lean();

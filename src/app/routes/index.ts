@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import { authRouter } from '../modules/auth/auth.route';
 import { userRouter } from '../modules/user/user.route';
-import { cowRouter } from '../modules/cow/cow.route';
+import { bookRouter } from '../modules/book/book.route';
 import { orderRouter } from '../modules/order/order.route';
 import { AdminRoutes } from '../modules/admin/admin.route';
 
@@ -22,8 +22,8 @@ const ROUTES: IRoute[] = [
     router: authRouter,
   },
   {
-    path: '/cows',
-    router: cowRouter,
+    path: '/books',
+    router: bookRouter,
   },
   {
     path: '/admins',

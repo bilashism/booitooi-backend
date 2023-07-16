@@ -9,7 +9,7 @@ import {
 } from '../../../helpers/paginationHelper';
 import { IGenericResponse } from '../../../interfaces/common';
 import { Admin } from '../admin/admin.model';
-import { Cow } from '../cow/cow.model';
+import { Book } from '../book/book.model';
 import { User } from '../user/user.model';
 import { orderSearchableFields } from './order.constant';
 import { IOrder, IOrderFilters } from './order.interface';
@@ -21,7 +21,7 @@ const createOrder = async (order: IOrder): Promise<IOrder | null> => {
   session.startTransaction();
   try {
     const buyer = await User.findById(order.buyer);
-    const cow = await Cow.findById(order.cow);
+    const cow = await Book.findById(order.cow);
 
     if (!buyer || buyer.role !== ENUM_USER_ROLES.BUYER) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Buyer not found');
@@ -43,7 +43,7 @@ const createOrder = async (order: IOrder): Promise<IOrder | null> => {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'Not enough budget.');
     }
 
-    const updatedCow = await Cow.findOneAndUpdate(
+    const updatedCow = await Book.findOneAndUpdate(
       { _id: cow._id },
       { label: 'sold out' },
       { session, new: true }
@@ -176,7 +176,7 @@ const getAllOrders = async (
       .limit(limit);
     total = result.length;
   } else if (isRightUser.role === ENUM_USER_ROLES.SELLER) {
-    const soldCows = await Cow.find({
+    const soldCows = await Book.find({
       seller: isRightUser._id,
       label: 'sold out',
     });
