@@ -43,6 +43,16 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getSingleUserByEmail = catchAsync(async (req: Request, res: Response) => {
+  const email = req.params.email;
+  const result = await userService.getSingleUserByEmail(email);
+  sendResponse<IUser>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User retrieved successfully',
+    data: result,
+  });
+});
 const checkSingleUser = catchAsync(async (req: Request, res: Response) => {
   const email = req.params.email;
   const result = await userService.checkSingleUser(email);
@@ -82,5 +92,6 @@ export const userController = {
   getAllUsers,
   updateUser,
   deleteUser,
+  getSingleUserByEmail,
   checkSingleUser,
 };

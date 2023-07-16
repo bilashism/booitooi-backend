@@ -17,6 +17,11 @@ userRouter.get(
   auth(ENUM_USER_ROLES.SUPERUSER, ENUM_USER_ROLES.ADMIN),
   userController.getSingleUser
 );
+userRouter.get(
+  '/email/:email',
+  // auth(ENUM_USER_ROLES.SUPERUSER, ENUM_USER_ROLES.ADMIN, ENUM_USER_ROLES.USER),
+  userController.getSingleUserByEmail
+);
 userRouter.delete(
   '/:id',
   auth(ENUM_USER_ROLES.SUPERUSER, ENUM_USER_ROLES.ADMIN),

@@ -97,6 +97,15 @@ const getSingleUser = async (id: string): Promise<IUser | null> => {
   const result = await User.findById(id);
   return result;
 };
+const getSingleUserByEmail = async (email: string): Promise<IUser | null> => {
+  const result = await User.findOne({ email }).select([
+    'id',
+    'email',
+    'role',
+    'uid',
+  ]);
+  return result;
+};
 const checkSingleUser = async (email: string): Promise<boolean> => {
   const result = await User.findOne({ email });
   return result ? true : false;
@@ -123,4 +132,5 @@ export const userService = {
   getAllUsers,
   updateUser,
   deleteUser,
+  getSingleUserByEmail,
 };
