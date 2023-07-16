@@ -43,6 +43,16 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const checkSingleUser = catchAsync(async (req: Request, res: Response) => {
+  const email = req.params.email;
+  const result = await userService.checkSingleUser(email);
+  sendResponse<boolean>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User retrieved successfully',
+    data: result,
+  });
+});
 
 const updateUser = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
@@ -72,4 +82,5 @@ export const userController = {
   getAllUsers,
   updateUser,
   deleteUser,
+  checkSingleUser,
 };

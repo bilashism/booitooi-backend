@@ -4,4 +4,6 @@ export enum ENUM_USER_ROLES {
   ADMIN = 'admin',
   BUYER = 'buyer',
   SELLER = 'seller',
+  USER = 'user',
+  AUTHOR = 'author',
 }

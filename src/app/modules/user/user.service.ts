@@ -11,6 +11,7 @@ import { userSearchableFields } from './user.constant';
 import { IUser, IUserFilters } from './user.interface';
 import { User } from './user.model';
 import { generateUserId } from './user.utils';
+import { ENUM_USER_ROLES } from '../../../enums/user';
 
 /**
  * This function creates a new user with an auto-generated ID and default password, and returns the
@@ -20,30 +21,11 @@ import { generateUserId } from './user.utils';
  * @returns The function `createUser` returns a Promise that resolves to an `IUser` object or `null`.
  */
 const createUser = async (user: IUser): Promise<IUser | null> => {
-  if (user.role === 'buyer' && !user?.budget) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Buyer must have a budget!');
-  }
-  if (user.role === 'seller' && user?.budget) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Seller can not have a budget!');
-  }
-
-  // auto generated incremental id
-  const id = await generateUserId();
-  user.id = id;
-
   // default password
   if (!user.password) {
     user.password = config.default_user_pass as string;
   }
-  // default budget
-  if (!user.budget) {
-    user.budget = 0;
-  }
-  // default income
-  if (!user.income) {
-    user.income = 0;
-  }
-
+  user.role = ENUM_USER_ROLES.USER;
   const createdUser = await User.create(user);
 
   if (!createUser) {
@@ -115,6 +97,10 @@ const getSingleUser = async (id: string): Promise<IUser | null> => {
   const result = await User.findById(id);
   return result;
 };
+const checkSingleUser = async (email: string): Promise<boolean> => {
+  const result = await User.findOne({ email });
+  return result ? true : false;
+};
 
 const updateUser = async (
   id: string,
@@ -133,6 +119,7 @@ const deleteUser = async (id: string): Promise<IUser | null> => {
 export const userService = {
   createUser,
   getSingleUser,
+  checkSingleUser,
   getAllUsers,
   updateUser,
   deleteUser,

@@ -12,26 +12,25 @@ const userNameSchema = new Schema<IUserName>({
 // User Schema
 const userSchema = new Schema<IUser>(
   {
-    id: { type: String, required: true, unique: true },
-    name: userNameSchema,
     role: {
       type: String,
       required: true,
       enum: userRole.filter(role => role !== 'admin'),
     },
-    address: {
-      type: String,
-      required: true,
-    },
-    budget: {
-      type: Number,
-    },
-    income: {
-      type: Number,
-    },
-    phoneNumber: {
+    email: {
       type: String,
       unique: true,
+      required: true,
+    },
+    emailVerified: {
+      type: Boolean,
+      required: true,
+    },
+    displayName: {
+      type: String,
+    },
+    uid: {
+      type: String,
       required: true,
     },
     password: {

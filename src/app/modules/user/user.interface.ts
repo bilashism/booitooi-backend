@@ -8,16 +8,14 @@ export type IUserName = {
 export type IUserFilters = {
   searchTerm?: string;
 };
-export type IUserRole = 'buyer' | 'seller' | 'admin';
+export type IUserRole = 'admin' | 'user';
 export type IUser = {
-  id: string;
+  email: string;
   password: string;
-  phoneNumber: string;
-  role: IUserRole;
-  name: IUserName;
-  address: string;
-  budget: number;
-  income: number;
+  role?: IUserRole;
+  uid: string;
+  emailVerified: boolean;
+  displayName?: string;
 };
 export type UserModel = {
   isUserExist(phoneNumber: string): Promise<IExistingUser | null>;

@@ -30,6 +30,11 @@ userRouter.patch(
 );
 userRouter.get(
   '/',
-  auth(ENUM_USER_ROLES.SUPERUSER, ENUM_USER_ROLES.ADMIN),
+  // auth(ENUM_USER_ROLES.SUPERUSER, ENUM_USER_ROLES.ADMIN),
   userController.getAllUsers
+);
+userRouter.get(
+  '/check/:email',
+  // auth(ENUM_USER_ROLES.SUPERUSER, ENUM_USER_ROLES.ADMIN),
+  userController.checkSingleUser
 );

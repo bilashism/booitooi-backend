@@ -5,35 +5,24 @@ import { User } from './user.model';
 const createUserZodSchema = z.object({
   body: z
     .object({
-      name: z.object({
-        firstName: z.string({
-          required_error: 'first name is required',
-        }),
-        lastName: z.string({
-          required_error: 'last name is required',
-        }),
+      password: z.string({
+        required_error: 'password is required',
       }),
-      role: z.enum(
-        [...userRole.filter(role => role !== 'admin')] as [string, ...string[]],
-        {
-          required_error: 'role is required',
-        }
-      ),
-      address: z.string({ required_error: 'address is required' }),
-      phoneNumber: z.string({ required_error: 'phoneNumber is required' }),
-      password: z.string().optional(),
-      budget: z.number().optional(),
-      income: z.number().optional(),
+      email: z.string({ required_error: 'email is required' }),
+      uid: z.string({ required_error: 'uid is required' }),
+      emailVerified: z.boolean({ required_error: 'email status is required' }),
+      displayName: z.string().optional(),
+      role: z.string().optional(),
     })
     .refine(
       async user => {
-        // Check if phoneNumber is unique
+        // Check if email is unique
         const isExisting = await User.findOne({
-          phoneNumber: user?.phoneNumber,
+          email: user?.email,
         }).lean();
         return isExisting ? false : true;
       },
-      { message: 'Phone number already exists' }
+      { message: 'email already exists' }
     ),
 });
 const updateUserZodSchema = z.object({
