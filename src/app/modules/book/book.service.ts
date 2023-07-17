@@ -93,7 +93,7 @@ const getAllBooks = async (
     select: '-password', // Exclude the password field from the populated user document
   };
   const result = await Book.find(whereConditions)
-    .populate(populateOptions)
+    // .populate(populateOptions)
     .sort(sortCondition)
     .skip(skip)
     .limit(limit);
@@ -126,7 +126,7 @@ const deleteBook = async (id: string): Promise<IBook | null> => {
   return result;
 };
 
-export const cowService = {
+export const bookService = {
   createBook,
   getAllBooks,
   getSingleBook,

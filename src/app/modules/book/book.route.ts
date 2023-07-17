@@ -27,12 +27,13 @@ bookRouter.get(
 
 bookRouter.get(
   '/',
-  auth(
-    ENUM_USER_ROLES.SUPERUSER,
-    ENUM_USER_ROLES.ADMIN,
-    ENUM_USER_ROLES.SELLER,
-    ENUM_USER_ROLES.BUYER
-  ),
+  // auth(
+  //   ENUM_USER_ROLES.SUPERUSER,
+  //   ENUM_USER_ROLES.ADMIN,
+  //   ENUM_USER_ROLES.SELLER,
+  //   ENUM_USER_ROLES.USER,
+  //   ENUM_USER_ROLES.BUYER
+  // ),
   bookController.getAllBooks
 );
 

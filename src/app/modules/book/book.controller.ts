@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { catchAsync } from '../../../shared/catchAsync';
 import { sendResponse } from '../../../shared/sendResponse';
-import { cowService } from './book.service';
+import { bookService } from './book.service';
 import { IBook } from './book.interface';
 import { pick } from '../../../shared/pick';
 import { PAGINATION_FIELDS } from '../../../constants/pagination';
@@ -10,7 +10,7 @@ import { bookFilterableFields } from './book.constant';
 
 const createBook = catchAsync(async (req: Request, res: Response) => {
   const book: IBook = req.body;
-  const result = await cowService.createBook(book);
+  const result = await bookService.createBook(book);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -23,7 +23,7 @@ const createBook = catchAsync(async (req: Request, res: Response) => {
 const getAllBooks = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, bookFilterableFields);
   const paginationOptions = pick(req.query, PAGINATION_FIELDS);
-  const result = await cowService.getAllBooks(filters, paginationOptions);
+  const result = await bookService.getAllBooks(filters, paginationOptions);
   sendResponse<IBook[]>(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -35,7 +35,7 @@ const getAllBooks = catchAsync(async (req: Request, res: Response) => {
 
 const getSingleBook = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
-  const result = await cowService.getSingleBook(id);
+  const result = await bookService.getSingleBook(id);
   sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -47,7 +47,7 @@ const getSingleBook = catchAsync(async (req: Request, res: Response) => {
 const updateBook = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
   const updatedData = req.body;
-  const result = await cowService.updateBook(id, updatedData);
+  const result = await bookService.updateBook(id, updatedData);
   sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -57,7 +57,7 @@ const updateBook = catchAsync(async (req: Request, res: Response) => {
 });
 const deleteBook = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
-  const result = await cowService.deleteBook(id);
+  const result = await bookService.deleteBook(id);
   sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
     success: true,
