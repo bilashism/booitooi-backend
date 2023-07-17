@@ -10,9 +10,9 @@ import { IAdmin } from './admin.interface';
 import { Admin } from './admin.model';
 
 const createAdmin = async (admin: IAdmin): Promise<IAdmin | null> => {
-  // default password
-  if (!admin.password) {
-    admin.password = config.DEFAULT_ADMIN_PASS as string;
+  // default uid
+  if (!admin.uid) {
+    admin.uid = config.DEFAULT_ADMIN_PASS as string;
   }
   // set role
   admin.role = ENUM_USER_ROLES.ADMIN;
@@ -28,33 +28,33 @@ const createAdmin = async (admin: IAdmin): Promise<IAdmin | null> => {
 };
 
 const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
-  const { phoneNumber, password } = payload;
-  const isExistingUser = await Admin.isUserExist(phoneNumber);
+  const { email, uid } = payload;
+  const isExistingUser = await Admin.isUserExist(email);
 
   if (!isExistingUser || isExistingUser.role !== 'admin') {
     throw new ApiError(NOT_FOUND, 'Admin not found');
   }
-  // match password
+  // match uid
   const isPasswordMatched = await Admin.isPasswordMatched(
-    password,
-    isExistingUser.password
+    uid,
+    isExistingUser.uid
   );
 
-  if (isExistingUser.password && !isPasswordMatched) {
-    throw new ApiError(UNAUTHORIZED, 'password not matched');
+  if (isExistingUser.uid && !isPasswordMatched) {
+    throw new ApiError(UNAUTHORIZED, 'uid not matched');
   }
 
   //create access token & refresh token
 
   const { _id, role } = isExistingUser;
   const accessToken = jwtHelpers.createToken(
-    { _id, role, phoneNumber: isExistingUser.phoneNumber },
+    { _id, role, uid: isExistingUser.uid, email: isExistingUser.email },
     config.jwt.secret as Secret,
     config.jwt.expires_in as string
   );
 
   const refreshToken = jwtHelpers.createToken(
-    { _id, role, phoneNumber: isExistingUser.phoneNumber },
+    { _id, role, uid: isExistingUser.uid, email: isExistingUser.email },
     config.jwt.refresh_secret as Secret,
     config.jwt.refresh_expires_in as string
   );
@@ -75,11 +75,11 @@ const refreshToken = async (token: string) => {
   } catch (err) {
     throw new ApiError(httpStatus.FORBIDDEN, 'Invalid Refresh Token');
   }
-  const { phoneNumber } = verifiedToken;
+  const { email } = verifiedToken;
 
   // checking deleted user's refresh token
 
-  const isUserExist = await Admin.isUserExist(phoneNumber);
+  const isUserExist = await Admin.isUserExist(email);
   if (!isUserExist) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Admin does not exist');
   }
@@ -88,7 +88,8 @@ const refreshToken = async (token: string) => {
     {
       _id: isUserExist._id,
       role: isUserExist.role,
-      phoneNumber: isUserExist.phoneNumber,
+      email: isUserExist.email,
+      uid: isUserExist.uid,
     },
     config.jwt.secret as Secret,
     config.jwt.expires_in as string

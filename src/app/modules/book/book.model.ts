@@ -12,10 +12,14 @@ const bookSchema = new Schema<IBook>(
   {
     title: { type: String, required: true },
     author: { type: String, required: true },
+    authorId: { type: String, required: true },
     genre: { type: String, enum: bookGenres, required: true },
     publicationDate: { type: String, required: true },
+    description: { type: String, required: true },
     label: { type: String, enum: bookLabel },
-    reviews: [bookReviewSchema],
+    reviews: {
+      type: bookReviewSchema,
+    },
   },
   {
     timestamps: true,

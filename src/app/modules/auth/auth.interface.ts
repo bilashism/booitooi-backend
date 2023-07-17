@@ -1,6 +1,6 @@
 export type ILoginUser = {
-  phoneNumber: string;
-  password: string;
+  email: string;
+  uid: string;
 };
 export type ILoginUserResponse = {
   accessToken: string;

@@ -12,7 +12,7 @@ export const findLastUserId = async () => {
     })
     .lean();
 
-  return lastUser?.id;
+  return '10';
 };
 
 /**

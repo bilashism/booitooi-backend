@@ -22,9 +22,10 @@ import { ENUM_USER_ROLES } from '../../../enums/user';
  */
 const createUser = async (user: IUser): Promise<IUser | null> => {
   // default password
-  if (!user.password) {
-    user.password = config.default_user_pass as string;
-  }
+  // if (!user.password) {
+  //   user.password = config.default_user_pass as string;
+  // }
+
   user.role = ENUM_USER_ROLES.USER;
   const createdUser = await User.create(user);
 

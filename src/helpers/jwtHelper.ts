@@ -4,7 +4,8 @@ import { IUserRole } from '../app/modules/user/user.interface';
 export type ICreateTokenPayload = {
   _id: Types.ObjectId;
   role: IUserRole;
-  phoneNumber: string;
+  email: string;
+  uid: string;
 };
 export type IVerifiedUserToken = JwtPayload & ICreateTokenPayload;
 

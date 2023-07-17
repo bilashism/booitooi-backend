@@ -27,6 +27,8 @@ export type IBookReview = {
 export type IBook = {
   title: string;
   author: string;
+  authorId: string;
+  description: string;
   publicationDate: string;
   genre: IBookGenre;
   label?: IBookLabel;

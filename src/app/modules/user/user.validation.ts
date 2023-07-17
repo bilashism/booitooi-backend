@@ -5,9 +5,9 @@ import { User } from './user.model';
 const createUserZodSchema = z.object({
   body: z
     .object({
-      password: z.string({
-        required_error: 'password is required',
-      }),
+      // password: z.string({
+      //   required_error: 'password is required',
+      // }),
       email: z.string({ required_error: 'email is required' }),
       uid: z.string({ required_error: 'uid is required' }),
       emailVerified: z.boolean({ required_error: 'email status is required' }),

@@ -10,7 +10,7 @@ export const bookRouter = express.Router();
 bookRouter.post(
   '/',
   validateRequest(BookValidation.createBookZodSchema),
-  auth(ENUM_USER_ROLES.SELLER),
+  auth(ENUM_USER_ROLES.USER),
   bookController.createBook
 );
 

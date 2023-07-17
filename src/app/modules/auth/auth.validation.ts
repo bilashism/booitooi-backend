@@ -5,7 +5,7 @@ const loginZodSchema = z.object({
     email: z.string({
       required_error: 'email is required',
     }),
-    password: z.string({ required_error: 'password is required' }),
+    uid: z.string({ required_error: 'uid is required' }),
   }),
 });
 const refreshTokenZodSchema = z.object({
