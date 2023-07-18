@@ -1,7 +1,7 @@
 import express from 'express';
 import { ENUM_USER_ROLES } from '../../../enums/user';
 import { auth } from '../../middlewares/auth';
-import { rightCowSeller } from '../../middlewares/rightCowSeller';
+import { rightAuthor } from '../../middlewares/rightAuthor';
 import { validateRequest } from '../../middlewares/validateRequest';
 import { bookController } from './book.controller';
 import { BookValidation } from './book.validation';
@@ -41,8 +41,8 @@ bookRouter.get(
 bookRouter.patch(
   '/:id',
   validateRequest(BookValidation.updateBookZodSchema),
-  auth(ENUM_USER_ROLES.SELLER),
-  rightCowSeller,
+  auth(ENUM_USER_ROLES.USER),
+  rightAuthor,
   bookController.updateBook
 );
 
@@ -54,13 +54,13 @@ bookRouter.post(
 );
 bookRouter.get(
   '/reviews/:bookId',
-  auth(ENUM_USER_ROLES.USER),
+  // auth(ENUM_USER_ROLES.USER),
   bookController.getBookReviews
 );
 
 bookRouter.delete(
   '/:id',
-  auth(ENUM_USER_ROLES.SELLER),
-  rightCowSeller,
+  auth(ENUM_USER_ROLES.USER),
+  rightAuthor,
   bookController.deleteBook
 );
