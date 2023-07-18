@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { SortOrder } from 'mongoose';
+import { SortOrder, UpdateWriteOpResult } from 'mongoose';
 import ApiError from '../../../errors/ApiError';
 import {
   IPaginationOptions,
@@ -7,11 +7,12 @@ import {
 } from '../../../helpers/paginationHelper';
 import { IGenericResponse } from '../../../interfaces/common';
 import { bookSearchableFields } from './book.constant';
-import { IBook, IBookFilters } from './book.interface';
+import { IBook, IBookFilters, IBookReview } from './book.interface';
 import { Book } from './book.model';
 
-const createBook = async (cow: IBook): Promise<IBook | null> => {
-  const createdCow = await Book.create(cow);
+const createBook = async (book: IBook): Promise<IBook | null> => {
+  book.reviews = [];
+  const createdCow = await Book.create(book);
 
   if (!createBook) {
     throw new ApiError(
@@ -121,6 +122,27 @@ const updateBook = async (
   });
   return result;
 };
+const addBookReview = async (
+  id: string,
+  payload: IBookReview
+): Promise<IBook> => {
+  const result = await Book.updateOne(
+    { _id: id },
+    {
+      $push: { reviews: payload }, // Append the item to the reviews array
+    }
+  );
+  const updatedBook = (await Book.findById(id)) as IBook;
+  return updatedBook;
+};
+const getBookReviews = async (
+  id: string
+): Promise<Partial<IBook>['reviews']> => {
+  const updatedBook = await Book.findById(id);
+
+  return updatedBook?.reviews;
+};
+
 const deleteBook = async (id: string): Promise<IBook | null> => {
   const result = await Book.findByIdAndDelete(id);
   return result;
@@ -129,6 +151,8 @@ const deleteBook = async (id: string): Promise<IBook | null> => {
 export const bookService = {
   createBook,
   getAllBooks,
+  addBookReview,
+  getBookReviews,
   getSingleBook,
   updateBook,
   deleteBook,

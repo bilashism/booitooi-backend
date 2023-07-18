@@ -33,8 +33,28 @@ const updateBookZodSchema = z.object({
       .optional(),
   }),
 });
+const addBookReviewZodSchema = z.object({
+  body: z.object({
+    bookId: z.string({
+      required_error: 'bookId required',
+    }),
+    reviewer: z.string({
+      required_error: 'reviewer required',
+    }),
+    rating: z
+      .number({
+        required_error: 'rating required',
+      })
+      .min(0, 'rating cannot be negative')
+      .max(5, 'rating cannot be more than 5'),
+    content: z.string({
+      required_error: 'content required',
+    }),
+  }),
+});
 
 export const BookValidation = {
   createBookZodSchema,
   updateBookZodSchema,
+  addBookReviewZodSchema,
 };

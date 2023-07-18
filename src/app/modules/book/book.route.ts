@@ -16,12 +16,13 @@ bookRouter.post(
 
 bookRouter.get(
   '/:id',
-  auth(
-    ENUM_USER_ROLES.SUPERUSER,
-    ENUM_USER_ROLES.ADMIN,
-    ENUM_USER_ROLES.SELLER,
-    ENUM_USER_ROLES.BUYER
-  ),
+  // auth(
+  //   ENUM_USER_ROLES.SUPERUSER,
+  //   ENUM_USER_ROLES.ADMIN,
+  //   ENUM_USER_ROLES.SELLER,
+  //   ENUM_USER_ROLES.BUYER,
+  //   ENUM_USER_ROLES.USER
+  // ),
   bookController.getSingleBook
 );
 
@@ -43,6 +44,18 @@ bookRouter.patch(
   auth(ENUM_USER_ROLES.SELLER),
   rightCowSeller,
   bookController.updateBook
+);
+
+bookRouter.post(
+  '/reviews',
+  validateRequest(BookValidation.addBookReviewZodSchema),
+  auth(ENUM_USER_ROLES.USER),
+  bookController.addBookReview
+);
+bookRouter.get(
+  '/reviews/:bookId',
+  auth(ENUM_USER_ROLES.USER),
+  bookController.getBookReviews
 );
 
 bookRouter.delete(
