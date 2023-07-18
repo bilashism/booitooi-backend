@@ -2,8 +2,6 @@ import express, { Router } from 'express';
 import { authRouter } from '../modules/auth/auth.route';
 import { userRouter } from '../modules/user/user.route';
 import { bookRouter } from '../modules/book/book.route';
-import { orderRouter } from '../modules/order/order.route';
-import { AdminRoutes } from '../modules/admin/admin.route';
 
 export const appRouter: Router = express.Router();
 
@@ -24,14 +22,6 @@ const ROUTES: IRoute[] = [
   {
     path: '/books',
     router: bookRouter,
-  },
-  {
-    path: '/admins',
-    router: AdminRoutes,
-  },
-  {
-    path: '/orders',
-    router: orderRouter,
   },
 ];
 
